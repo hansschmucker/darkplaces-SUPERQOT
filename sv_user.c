@@ -157,21 +157,10 @@ static void SV_Accelerate (void)
 	prvm_prog_t *prog = SVVM_prog;
 	int i;
 	float addspeed, accelspeed, currentspeed;
-	float targetSlowmo;
 	float rampUp = 0.1;
 
 	currentspeed = DotProduct (PRVM_serveredictvector(host_client->edict, velocity), wishdir);
 	
-	if(slowmo.flags&8)
-		targetSlowmo = 1;
-	else 
-		targetSlowmo = max(0.02, wishspeed/sv_maxspeed.value);
-
-
-	//slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
-
-	//Cvar_SetValue("slowmo", max(0.1, wishspeed/sv_maxspeed.value));
-
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0)
 		return;
@@ -189,20 +178,11 @@ static void SV_AirAccelerate (vec3_t wishveloc)
 	prvm_prog_t *prog = SVVM_prog;
 	int i;
 	float addspeed, wishspd, accelspeed, currentspeed;
-	//float targetSlowmo;
-	//float rampUp = 0.1;
 
 	wishspd = VectorNormalizeLength (wishveloc);
 	if (wishspd > sv_maxairspeed.value)
 		wishspd = sv_maxairspeed.value;
 	currentspeed = DotProduct (PRVM_serveredictvector(host_client->edict, velocity), wishveloc);
-
-	//if(slowmo.flags&8)
-		//targetSlowmo = 1;
-	//else 
-		//targetSlowmo = max(0.02, wishspeed/sv_maxspeed.value);
-
-	//slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
 
 	addspeed = wishspd - currentspeed;
 	if (addspeed <= 0)
@@ -382,22 +362,7 @@ static void SV_AirMove (void)
 }
 
 
-
-static void SV_MoveSlowMo(prvm_prog_t* prog, vec3_t initorigin) {
-	vec3_t dist;
-	float* curorigin = PRVM_serveredictvector(host_client->edict, origin);
-	dist[0] = fabsf((initorigin[0] - curorigin[0]));
-	dist[1] = fabsf((initorigin[1] - curorigin[1]));
-	dist[2] = fabsf((initorigin[2] - curorigin[2]));
-	float len = sqrtf(dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2]);
-	Con_Printf("Distance: %f\n", len);
-	slowmo.value = max(0.1, min(1.0, len / cl.movevars_maxspeed));
-}
-
-static float GetLen(vec3_t dist) {
-	return sqrtf(dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2]);
-}
-
+#define VEC3_LEN(vec) sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2])
 
 /*
 ===================
@@ -426,7 +391,7 @@ void SV_ClientThink (void)
 		prog->ExecuteProgram(prog, PRVM_serverfunction(SV_PlayerPhysics), "QC function SV_PlayerPhysics is missing");
 		SV_CheckVelocity(host_client->edict);
 
-		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8?0.25:0.1, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8?0.25:0.1, min(1.0, VEC3_LEN(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
@@ -466,7 +431,7 @@ void SV_ClientThink (void)
 		SV_WaterJump ();
 		SV_CheckVelocity(host_client->edict);
 
-		slowmo.value = max(slowmo.flags & 16 ? 1.0 :slowmo.flags & 8 ? 0.25 : 0.1, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 :slowmo.flags & 8 ? 0.25 : 0.1, min(1.0, VEC3_LEN(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
@@ -486,14 +451,14 @@ void SV_ClientThink (void)
 		SV_WaterMove ();
 		SV_CheckVelocity(host_client->edict);
 
-		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : 0.01, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : 0.01, min(1.0, VEC3_LEN(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
 	SV_AirMove ();
 	SV_CheckVelocity(host_client->edict);
 
-	slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : onground ? 0.01 : 0.2, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
+	slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : onground ? 0.01 : 0.2, min(1.0, VEC3_LEN(velocity) / cl.movevars_maxspeed));
 }
 
 /*
