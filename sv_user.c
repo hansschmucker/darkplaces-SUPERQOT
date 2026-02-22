@@ -157,7 +157,6 @@ static void SV_Accelerate (void)
 	prvm_prog_t *prog = SVVM_prog;
 	int i;
 	float addspeed, accelspeed, currentspeed;
-	float rampUp = 0.1;
 
 	currentspeed = DotProduct (PRVM_serveredictvector(host_client->edict, velocity), wishdir);
 	

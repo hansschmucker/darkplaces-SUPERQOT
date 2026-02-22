@@ -275,6 +275,7 @@
     <ClInclude Include="prvm_execprogram.h" />
     <ClInclude Include="qtypes.h" />
     <ClInclude Include="quakedef.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="r_lerpanim.h" />
     <ClInclude Include="r_modules.h" />
     <ClInclude Include="r_shadow.h" />
@@ -302,6 +303,12 @@
     <ClInclude Include="wad.h" />
     <ClInclude Include="world.h" />
     <ClInclude Include="zone.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="darkplaces-sdl-vs2022.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="darkplaces.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
