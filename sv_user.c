@@ -117,6 +117,8 @@ static void SV_UserFriction (void)
 	trace_t trace;
 
 	speed = sqrt(PRVM_serveredictvector(host_client->edict, velocity)[0]*PRVM_serveredictvector(host_client->edict, velocity)[0]+PRVM_serveredictvector(host_client->edict, velocity)[1]*PRVM_serveredictvector(host_client->edict, velocity)[1]);
+
+
 	if (!speed)
 		return;
 
@@ -166,7 +168,7 @@ static void SV_Accelerate (void)
 		targetSlowmo = max(0.02, wishspeed/sv_maxspeed.value);
 
 
-	slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
+	//slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
 
 	//Cvar_SetValue("slowmo", max(0.1, wishspeed/sv_maxspeed.value));
 
@@ -187,21 +189,20 @@ static void SV_AirAccelerate (vec3_t wishveloc)
 	prvm_prog_t *prog = SVVM_prog;
 	int i;
 	float addspeed, wishspd, accelspeed, currentspeed;
-	float targetSlowmo;
-	float rampUp = 0.1;
+	//float targetSlowmo;
+	//float rampUp = 0.1;
 
 	wishspd = VectorNormalizeLength (wishveloc);
 	if (wishspd > sv_maxairspeed.value)
 		wishspd = sv_maxairspeed.value;
 	currentspeed = DotProduct (PRVM_serveredictvector(host_client->edict, velocity), wishveloc);
 
-	if(slowmo.flags&8)
-		targetSlowmo = 1;
-	else 
-		targetSlowmo = max(0.02, wishspeed/sv_maxspeed.value);
+	//if(slowmo.flags&8)
+		//targetSlowmo = 1;
+	//else 
+		//targetSlowmo = max(0.02, wishspeed/sv_maxspeed.value);
 
-
-	slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
+	//slowmo.value = ((sv.frametime * targetSlowmo) + ((rampUp-sv.frametime) * slowmo.value)) / rampUp;
 
 	addspeed = wishspd - currentspeed;
 	if (addspeed <= 0)
@@ -380,6 +381,24 @@ static void SV_AirMove (void)
 	}
 }
 
+
+
+static void SV_MoveSlowMo(prvm_prog_t* prog, vec3_t initorigin) {
+	vec3_t dist;
+	float* curorigin = PRVM_serveredictvector(host_client->edict, origin);
+	dist[0] = fabsf((initorigin[0] - curorigin[0]));
+	dist[1] = fabsf((initorigin[1] - curorigin[1]));
+	dist[2] = fabsf((initorigin[2] - curorigin[2]));
+	float len = sqrtf(dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2]);
+	Con_Printf("Distance: %f\n", len);
+	slowmo.value = max(0.1, min(1.0, len / cl.movevars_maxspeed));
+}
+
+static float GetLen(vec3_t dist) {
+	return sqrtf(dist[0] * dist[0] + dist[1] * dist[1] + dist[2] * dist[2]);
+}
+
+
 /*
 ===================
 SV_ClientThink
@@ -406,19 +425,27 @@ void SV_ClientThink (void)
 		PRVM_serverglobaledict(self) = PRVM_EDICT_TO_PROG(host_client->edict);
 		prog->ExecuteProgram(prog, PRVM_serverfunction(SV_PlayerPhysics), "QC function SV_PlayerPhysics is missing");
 		SV_CheckVelocity(host_client->edict);
+
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8?0.25:0.1, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
-	if (PRVM_serveredictfloat(host_client->edict, movetype) == MOVETYPE_NONE)
+	if (PRVM_serveredictfloat(host_client->edict, movetype) == MOVETYPE_NONE) {
+
+		slowmo.value = 1;
 		return;
+	}
 
 	onground = ((int)PRVM_serveredictfloat(host_client->edict, flags) & FL_ONGROUND) != 0;
 
 	DropPunchAngle ();
 
 	// if dead, behave differently
-	if (PRVM_serveredictfloat(host_client->edict, health) <= 0)
+	if (PRVM_serveredictfloat(host_client->edict, health) <= 0) {
+
+		slowmo.value = 1;
 		return;
+	}
 
 	cmd = host_client->cmd;
 
@@ -438,6 +465,8 @@ void SV_ClientThink (void)
 	{
 		SV_WaterJump ();
 		SV_CheckVelocity(host_client->edict);
+
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 :slowmo.flags & 8 ? 0.25 : 0.1, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
@@ -456,11 +485,15 @@ void SV_ClientThink (void)
 	{
 		SV_WaterMove ();
 		SV_CheckVelocity(host_client->edict);
+
+		slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : 0.01, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
 		return;
 	}
 
 	SV_AirMove ();
 	SV_CheckVelocity(host_client->edict);
+
+	slowmo.value = max(slowmo.flags & 16 ? 1.0 : slowmo.flags & 8 ? 0.25 : onground ? 0.01 : 0.2, min(1.0, GetLen(velocity) / cl.movevars_maxspeed));
 }
 
 /*

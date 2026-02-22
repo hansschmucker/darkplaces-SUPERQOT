@@ -153,8 +153,14 @@ static void IN_MoverightUp(void) {KeyUp(&in_moveright);}
 
 static void IN_SpeedDown(void) {KeyDown(&in_speed);}
 static void IN_SpeedUp(void) {KeyUp(&in_speed);}
-static void IN_StrafeDown(void) {KeyDown(&in_strafe);}
-static void IN_StrafeUp(void) {KeyUp(&in_strafe);}
+static void IN_StrafeDown(void) {
+	slowmo.flags |= 16;
+	//KeyDown(&in_strafe);
+}
+static void IN_StrafeUp(void) {
+	slowmo.flags &= ~16;
+	//KeyUp(&in_strafe);
+}
 
 extern cvar_t slowmo;
 
@@ -1351,7 +1357,7 @@ static void CL_ClientMovement_Physics_Walk(cl_clientmovement_state_t *s)
 
 
 		
-		Cvar_SetValue("slowmo", max(0.1, wishspeed/cl.movevars_maxspeed));
+		//Cvar_SetValue("slowmo", max(0.01, wishspeed/cl.movevars_maxspeed));
 		
 		// apply edge friction
 		f = sqrt(s->velocity[0] * s->velocity[0] + s->velocity[1] * s->velocity[1]);
@@ -1416,6 +1422,9 @@ static void CL_ClientMovement_Physics_Walk(cl_clientmovement_state_t *s)
 			wishspeed = min(wishspeed, cl.movevars_maxairspeed);
 			if (s->crouched)
 				wishspeed *= 0.5;
+
+			//Cvar_SetValue("slowmo", max(0.01, wishspeed / cl.movevars_maxspeed));
+
 			accel = cl.movevars_airaccelerate;
 
 			accelerating = (DotProduct(s->velocity, wishdir) > 0);

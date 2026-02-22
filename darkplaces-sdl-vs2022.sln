@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{29AB7211-491A-41AA-89B1-4D2E753926D3}") = "darkplaces-sdl-vs2022", "darkplaces-sdl-vs2022.vcxproj", "{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Debug|x64.ActiveCfg = Debug|x64
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Debug|x64.Build.0 = Debug|x64
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Debug|x86.ActiveCfg = Debug|Win32
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Debug|x86.Build.0 = Debug|Win32
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Release|x64.ActiveCfg = Release|x64
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Release|x64.Build.0 = Release|x64
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Release|x86.ActiveCfg = Release|Win32
+		{59020691-34E6-4f0A-AD2B-7C3AA03A3F46}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {06891B72-BD3A-49F1-B98D-6D6AF8AA2CDE}
+	EndGlobalSection
+EndGlobal
