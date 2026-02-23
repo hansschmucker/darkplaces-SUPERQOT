@@ -283,7 +283,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="sbar.h" />
     <ClInclude Include="screen.h" />
-    <ClInclude Include="SDLMain.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="shader_glsl.h" />
     <ClInclude Include="shader_hlsl.h" />
