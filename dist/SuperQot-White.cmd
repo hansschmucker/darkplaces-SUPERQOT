@@ -1,0 +1,1 @@
+@START SuperQot +gl_lightmaps 1 +r_showtris 1
