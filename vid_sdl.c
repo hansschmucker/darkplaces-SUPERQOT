@@ -2052,8 +2052,47 @@ void *GL_GetProcAddress(const char *name)
 
 static qboolean vid_sdl_initjoysticksystem = false;
 
+#ifdef _WIN32
+typedef enum { dpi_unaware = 0, dpi_system_aware = 1, dpi_monitor_aware = 2 } dpi_awareness;
+typedef BOOL(WINAPI* SetProcessDPIAwareFunc)();
+typedef HRESULT(WINAPI* SetProcessDPIAwarenessFunc)(dpi_awareness value);
+
+//static void System_SetDPIAware (void)
+void Sys_Platform_Init_DPI(void) // Windows DPI awareness
+{
+
+	HMODULE hUser32, hShcore;
+	SetProcessDPIAwarenessFunc setDPIAwareness;
+	SetProcessDPIAwareFunc setDPIAware;
+
+	/* Neither SDL 1.2
+   nor SDL 2.0.3 can handle the OS scaling our window.
+	  (e.g. https://bugzilla.libsdl.org/show_bug.cgi?id=2713)
+	  Call SetProcessDpiAwareness/SetProcessDPIAware to opt out of scaling.
+	*/
+
+	hShcore = LoadLibraryA("Shcore.dll");
+	hUser32 = LoadLibraryA("user32.dll");
+	setDPIAwareness = (SetProcessDPIAwarenessFunc)(hShcore ? GetProcAddress(hShcore, "SetProcessDpiAwareness") : NULL);
+	setDPIAware = (SetProcessDPIAwareFunc)(hUser32 ? GetProcAddress(hUser32, "SetProcessDPIAware") : NULL);
+
+	if (setDPIAwareness) /* Windows 8.1+ */
+		setDPIAwareness(dpi_monitor_aware);
+	else if (setDPIAware) /* Windows Vista-8.0 */
+		setDPIAware();
+
+	if (hShcore)
+		FreeLibrary(hShcore);
+	if (hUser32)
+		FreeLibrary(hUser32);
+
+}
+#endif // _WIN32
+
+
 void VID_Init (void)
 {
+	Sys_Platform_Init_DPI();
 #ifndef __IPHONEOS__
 #ifdef MACOSX
 	Cvar_RegisterVariable(&apple_mouse_noaccel);
